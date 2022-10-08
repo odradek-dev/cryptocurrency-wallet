@@ -3,6 +3,7 @@ replicaCount: 1
 image:
   repository: 977657838404.dkr.ecr.us-east-1.amazonaws.com/utxo-wallet
   pullPolicy: Always
+  tag: latest
 
 serviceAccount:
   create: true
@@ -24,7 +25,7 @@ autoscaling:
   targetMemoryUtilizationPercentage: 80
 
 secrets:
-  objectName: dev/utxo-service
+  objectName: dev/utxo-wallet-service
   objects:
     - path: database_url_schema
       objectAlias: databaseURLSchema
@@ -91,7 +92,7 @@ secrets:
       key: LITECOIN_ENABLED
     - objectName: litecoinRPCHost
       key: LITECOIN_RPC_HOST
-    - objectName: litecionRPCPort
+    - objectName: litecoinRPCPort
       key: LITECOIN_RPC_PORT
     - objectName: litecoinRPCUsername
       key: LITECOIN_RPC_USERNAME
