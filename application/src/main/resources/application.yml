@@ -34,6 +34,21 @@ spring:
   application:
     name: "CryptoCurrency Wallet"
 
+  # Kafka
+  kafka:
+    properties:
+      sasl:
+        mechanism: PLAIN
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    security:
+      protocol: SASL_SSL
+    jaas:
+      enabled: true
+      login-module: org.apache.kafka.common.security.plain.PlainLoginModule
+      options:
+        username: ${KAFKA_JAAS_USERNAME}
+        password: ${KAFKA_JAAS_PASSWORD}
+      control-flag: required
 
 logging:
   file:

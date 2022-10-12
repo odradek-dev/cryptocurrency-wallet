@@ -4,12 +4,14 @@ import com.hacks1ash.crypto.wallet.core.BlockListener;
 import com.hacks1ash.crypto.wallet.core.TransactionListener;
 import com.hacks1ash.crypto.wallet.core.model.request.NewBlock;
 import com.hacks1ash.crypto.wallet.core.model.request.NewTransaction;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Blockchain API")
 @RestController
 @RequestMapping(value = "node/")
 public class BlockchainController {

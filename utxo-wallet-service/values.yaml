@@ -15,7 +15,24 @@ service:
   port: 80
 
 ingress:
-  enabled: false
+  enabled: true
+  pathType: Prefix
+  annotations:
+    # Ingress Core Settings
+    kubernetes.io/ingress.class: "alb"
+    alb.ingress.kubernetes.io/scheme: internal
+    # Health Check Settings
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-port: traffic-port
+    #Important Note: Need to add health check path annotations in service level if we are planning to use multiple targets in a load balancer
+    alb.ingress.kubernetes.io/healthcheck-path: /api/actuator/health
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '15'
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
+    alb.ingress.kubernetes.io/success-codes: '200'
+    alb.ingress.kubernetes.io/healthy-threshold-count: '2'
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
+    ## SSL Settings
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
 
 autoscaling:
   enabled: true
@@ -63,6 +80,12 @@ secrets:
       objectAlias: litecoinRPCPassword
     - path: litecoin_network
       objectAlias: litecoinNetwork
+    - path: kafka_bootstrap_servers
+      objectAlias: kafkaServers
+    - path: kafka_jaas_username
+      objectAlias: kafkaUsername
+    - path: kafka_jaas_password
+      objectAlias: kafkaPassword
   env:
     - objectName: databaseURLSchema
       key: DATABASE_URL_SCHEMA
@@ -100,3 +123,9 @@ secrets:
       key: LITECOIN_RPC_PASSWORD
     - objectName: litecoinNetwork
       key: LITECOIN_NETWORK
+    - objectName: kafkaServers
+      key: KAFKA_BOOTSTRAP_SERVERS
+    - objectName: kafkaUsername
+      key: KAFKA_JAAS_USERNAME
+    - objectName: kafkaPassword
+      key: KAFKA_JAAS_PASSWORD

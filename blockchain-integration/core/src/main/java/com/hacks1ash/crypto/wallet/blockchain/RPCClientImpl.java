@@ -144,8 +144,8 @@ public abstract class RPCClientImpl implements RPCClient {
         List<Object> resultList = (List<Object>) result;
         for (Object obj : resultList) {
           LinkedHashMap map = (LinkedHashMap) obj;
-          boolean success = (boolean) map.get("success");
-          if (!success) {
+          Boolean success = (Boolean) map.get("success");
+          if (success != null && !success) {
             throw new RPCException(new RPCError(response), (String) ((LinkedHashMap) map.get("error")).get("message"));
           }
         }

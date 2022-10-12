@@ -18,21 +18,24 @@ import com.hacks1ash.crypto.wallet.core.storage.WebhookSubscriptionRepository;
 import com.hacks1ash.crypto.wallet.core.storage.document.Wallet;
 import com.hacks1ash.crypto.wallet.core.storage.document.Webhook;
 import com.hacks1ash.crypto.wallet.core.storage.document.WebhookSubscription;
+import com.odradek.pay.kafka.intergation.KafkaTopicProperties;
+import com.odradek.pay.kafka.intergation.message.TransactionMessage;
+import com.odradek.pay.kafka.intergation.model.WebhookTransactionDetails;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 
 @Slf4j
 @Service
+@AllArgsConstructor
 public class TransactionSubscriptionService implements TransactionListener {
 
   private WalletRepository walletRepository;
@@ -45,94 +48,67 @@ public class TransactionSubscriptionService implements TransactionListener {
 
   private WebhookRepository webhookRepository;
 
+  private KafkaTemplate transactionKafkaTemplate;
+
+  private KafkaTopicProperties kafkaTopicProperties;
+
 
   @Override
   public void onTransaction(NewTransaction newTransaction) {
     CryptoCurrency cryptoCurrency = CryptoCurrency.cryptoCurrencyFromShortName(newTransaction.getCoin());
     UTXORPCClient rpcClient = utxoClientFactory.getClient(cryptoCurrency.getUtxoProvider());
+    Wallet wallet = walletRepository.findByNodeWalletNameAlias(newTransaction.getWalletName()).orElseThrow(() -> new WalletException.WalletNotFound(newTransaction.getWalletName()));
+    Optional<WebhookSubscription> optionalWebhookSubscription = webhookSubscriptionRepository.findByWalletId(wallet.getId());
+    GetTrasactionResponse transaction = rpcClient.getTransaction(new GetTransactionRequest(cryptoCurrency.getUtxoProvider(), wallet.getNodeWalletNameAlias(), newTransaction.getTxId()), wallet.getCurrency().getNetworkParams());
 
-    Set<Wallet> walletsByDepositAddresses = walletRepository.findAllByAddresses(newTransaction.getAddresses());
-//    Set<Wallet> walletsByChangeAddresses = walletRepository.findAllByChangeAddresses(newTransaction.getAddresses());
+    WebhookTXStatus txStatus;
 
-    if (walletsByDepositAddresses == null || walletsByDepositAddresses.size() == 0) {
-      return;
+    if (transaction.getConfirmations() == 0) {
+      txStatus = WebhookTXStatus.MEMPOOL;
+    } else if (transaction.getConfirmations() < 1) {
+      txStatus = WebhookTXStatus.PENDING;
+    } else {
+      txStatus = WebhookTXStatus.CONFIRMED;
     }
 
-    List<Wallet> wallets = new ArrayList<>(walletsByDepositAddresses);
+    GetTransactionResponse getTransactionResponse = walletManager.getTransaction(wallet.getId(), newTransaction.getTxId());
+    getTransactionResponse.setConfirmations(transaction.getConfirmations());
 
-    for (Wallet wallet : wallets) {
-      try {
-        WebhookSubscription webhookSubscription = webhookSubscriptionRepository.findByWalletId(wallet.getId()).orElseThrow(() -> new WalletException("wallet.not.subscribed", "Wallet not subscribed for webhooks with id -> " + wallet.getId(), 400));
+    Webhook webhook = new Webhook(
+        wallet.getId(),
+        transaction.getTxid(),
+        transaction.isReplaceable(),
+        transaction.isReplaceable(),
+        transaction.getConfirmations(),
+        transaction.getBlockHeight(),
+        txStatus,
+        null,
+        getTransactionResponse
+    );
 
-        GetTrasactionResponse transaction = rpcClient.getTransaction(new GetTransactionRequest(cryptoCurrency.getUtxoProvider(), wallet.getNodeWalletNameAlias(), newTransaction.getTxid()), wallet.getCurrency().getNetworkParams());
-
-        WebhookTXStatus txStatus;
-
-        if (transaction.getConfirmations() == 0) {
-          txStatus = WebhookTXStatus.MEMPOOL;
-        } else if (transaction.getConfirmations() < webhookSubscription.getConfirmations()) {
-          txStatus = WebhookTXStatus.PENDING;
-        } else {
-          txStatus = WebhookTXStatus.CONFIRMED;
-        }
-
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("x-wallet-id", wallet.getId());
-        httpHeaders.add("x-provider", "OWS");
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-
-        GetTransactionResponse webhookData = walletManager.getTransaction(wallet.getId(), newTransaction.getTxid());
-        webhookData.setConfirmations(transaction.getConfirmations());
-        HttpEntity<GetTransactionResponse> httpEntity = new HttpEntity<>(webhookData, httpHeaders);
-
-        ResponseEntity<Void> response = restTemplate.postForEntity(webhookSubscription.getEndpoint(), httpEntity, Void.class);
-
-        Webhook webhook = new Webhook(
-          wallet.getId(),
-          transaction.getTxid(),
-          transaction.isReplaceable(),
-          transaction.isReplaceable(),
-          transaction.getConfirmations(),
-          transaction.getBlockHeight(),
-          txStatus,
-          response.getStatusCode().is2xxSuccessful() ? WebhookStatus.DELIEVERED : WebhookStatus.FAILED,
-          webhookData
-        );
-        log.info(webhookRepository.save(webhook).toString());
-      } catch (WalletException ex) {
-        if (ex.getErrorKey().equalsIgnoreCase("wallet.not.subscribed")) {
-          log.warn(ex.getErrorMessage());
-        }
-        throw ex;
-      }
+    if (optionalWebhookSubscription.isPresent()) {
+      WebhookSubscription webhookSubscription = optionalWebhookSubscription.get();
+      RestTemplate restTemplate = new RestTemplate();
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.add("x-wallet-id", wallet.getId());
+      httpHeaders.add("x-provider", "OWS");
+      httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+      HttpEntity<GetTransactionResponse> httpEntity = new HttpEntity<>(getTransactionResponse, httpHeaders);
+      ResponseEntity<Void> response = restTemplate.postForEntity(webhookSubscription.getEndpoint(), httpEntity, Void.class);
+      WebhookStatus webhookStatus = response.getStatusCode().is2xxSuccessful() ? WebhookStatus.DELIEVERED : WebhookStatus.FAILED;
+      webhook.setWebhookStatus(webhookStatus);
     }
+
+    String topic;
+
+    if (txStatus == WebhookTXStatus.MEMPOOL || txStatus == WebhookTXStatus.PENDING) {
+      topic = kafkaTopicProperties.getPendingTransaction();
+    } else {
+      topic = kafkaTopicProperties.getConfirmedTransaction();
+    }
+
+    transactionKafkaTemplate.send(topic, new TransactionMessage(new WebhookTransactionDetails(wallet.getId(), transaction.getTxid())));
+    log.info(webhookRepository.save(webhook).toString());
   }
 
-
-  @Autowired
-  public void setWalletRepository(WalletRepository walletRepository) {
-    this.walletRepository = walletRepository;
-  }
-
-  @Autowired
-  public void setBlockchainIntegrationFactory(UTXOClientFactory utxoClientFactory) {
-    this.utxoClientFactory = utxoClientFactory;
-  }
-
-  @Autowired
-  public void setWebhookSubscriptionRepository(WebhookSubscriptionRepository webhookSubscriptionRepository) {
-    this.webhookSubscriptionRepository = webhookSubscriptionRepository;
-  }
-
-  @Autowired
-  public void setWalletManager(WalletManager walletManager) {
-    this.walletManager = walletManager;
-  }
-
-  @Autowired
-  public void setWebhookRepository(WebhookRepository webhookRepository) {
-    this.webhookRepository = webhookRepository;
-  }
 }

@@ -5,8 +5,8 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Repository
@@ -18,5 +18,6 @@ public interface WalletRepository extends MongoRepository<Wallet, String> {
   @Query("{ 'changeAddress': { $in : ?0 }}")
   Set<Wallet> findAllByChangeAddresses(List<String> changeAddresses);
 
+  Optional<Wallet> findByNodeWalletNameAlias(String nodeWalletNameAlias);
 
 }

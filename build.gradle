@@ -27,11 +27,25 @@ idea {
     }
 }
 
+def repos = ["pay-kafka-intergation", "utxo-wallet"]
+
 allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
         maven { url 'https://packages.confluent.io/maven/' }
+
+
+        repos.each { repo ->
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/odradek-dev/${repo}")
+                credentials {
+                    username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                    password = project.findProperty("gpr.token") ?: System.getenv("TOKEN")
+                }
+            }
+        }
     }
 }
 
@@ -106,7 +120,7 @@ subprojects {
         springMail 'org.springframework.boot:spring-boot-starter-mail'
         springDevtools 'org.springframework.boot:spring-boot-devtools'
         springAOP 'org.springframework.boot:spring-boot-starter-aop'
-        springKafka 'org.springframework.kafka:spring-kafka'
+        springKafka 'com.odradek:pay-kafka-intergation:1.0.2'
         springDocs 'org.springdoc:springdoc-openapi-ui:1.5.2'
         springValidation 'org.springframework.boot:spring-boot-starter-validation'
 

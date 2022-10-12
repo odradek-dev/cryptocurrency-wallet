@@ -13,7 +13,7 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@SpringBootApplication(scanBasePackages = {"com.hacks1ash.crypto.wallet"})
+@SpringBootApplication(scanBasePackages = {"com.hacks1ash.crypto.wallet", "com.odradek"})
 @EnableMongoRepositories(basePackages = {"com.hacks1ash.crypto.wallet"})
 @EntityScan(basePackages = {"com.hacks1ash.crypto.wallet"})
 @EnableScheduling
