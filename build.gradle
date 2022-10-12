@@ -3,7 +3,7 @@ import org.springframework.boot.gradle.plugin.SpringBootPlugin
 buildscript {
 
     repositories {
-        mavenLocal()
+        mavenCentral()
         maven { url "https://plugins.gradle.org/m2/" }
     }
 
@@ -31,7 +31,6 @@ def repos = ["pay-kafka-intergation", "utxo-wallet"]
 
 allprojects {
     repositories {
-        mavenLocal()
         mavenCentral()
         maven { url 'https://packages.confluent.io/maven/' }
 
