@@ -2,6 +2,10 @@
 FROM public.ecr.aws/bitnami/java:11 as gradle
 WORKDIR /app
 COPY . .
+
+ENV USENRAME=hacks1ash
+ENV TOKEN=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
+
 RUN ./gradlew build
 
 FROM cirrusci/wget as datadog

@@ -27,7 +27,7 @@ idea {
     }
 }
 
-def repos = ["pay-kafka-intergation", "utxo-wallet"]
+def repos = ["pay-kafka-intergation"]
 
 allprojects {
     repositories {
@@ -37,11 +37,10 @@ allprojects {
 
         repos.each { repo ->
             maven {
-                name = "GitHubPackages"
                 url = uri("https://maven.pkg.github.com/odradek-dev/${repo}")
                 credentials {
-                    username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
-                    password = project.findProperty("gpr.token") ?: System.getenv("TOKEN")
+                    username = System.getenv("USERNAME") ?: project.findProperty("gpr.user")
+                    password = System.getenv("TOKEN") ?:  project.findProperty("gpr.token")
                 }
             }
         }
