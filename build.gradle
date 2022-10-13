@@ -36,7 +36,7 @@ allprojects {
         maven {
             url = uri("https://maven.pkg.github.com/odradek-dev/pay-kafka-intergation")
             credentials {
-                username = project.findProperty("gpr.user")
+                username = System.getenv("TOKEN") ?: project.findProperty("gpr.user")
                 password = System.getenv("TOKEN") ?: project.findProperty("gpr.token")
             }
         }
@@ -44,6 +44,10 @@ allprojects {
 }
 
 subprojects {
+
+    if (!file('build.gradle').exists()) {
+        return
+    }
 
     apply plugin: 'io.spring.dependency-management'
     apply plugin: 'org.springframework.boot'
@@ -58,10 +62,6 @@ subprojects {
             outputDir = new File(rootProject.projectDir, '.out')
             testOutputDir = new File(rootProject.projectDir, '.out')
         }
-    }
-
-    if (!file('build.gradle').exists()) {
-        return
     }
 
     apply plugin: 'java'

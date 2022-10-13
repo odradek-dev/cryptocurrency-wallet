@@ -11,8 +11,7 @@ jobs:
     environment: dev
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      packages: read
+      packages: write
 
     steps:
       - name: Checkout
@@ -27,6 +26,7 @@ jobs:
 
       - name: Build with Gradle
         env:
+          USERNAME: ${{ github.actor }}
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew build
 
