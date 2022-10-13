@@ -27,20 +27,18 @@ idea {
     }
 }
 
-def repos = ["pay-kafka-intergation", "utxo-wallet"]
+def codeartifactToken = System.getenv("CODEARTIFACT_TOKEN") ?: "aws codeartifact get-authorization-token --domain odradek --domain-owner 977657838404 --query authorizationToken --output text --profile odradekGithub".execute().text
 
 allprojects {
     repositories {
         mavenCentral()
         maven { url 'https://packages.confluent.io/maven/' }
 
-        repos.each { repo ->
-            maven {
-                url = uri("https://maven.pkg.github.com/odradek-dev/${repo}")
-                credentials {
-                    username = project.findProperty("gpr.user")
-                    password = project.findProperty("gpr.token")
-                }
+        maven {
+            url 'https://odradek-977657838404.d.codeartifact.us-east-1.amazonaws.com/maven/odradek/'
+            credentials {
+                username "aws"
+                password codeartifactToken
             }
         }
     }
