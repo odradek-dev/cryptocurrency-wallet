@@ -33,15 +33,11 @@ allprojects {
     repositories {
         mavenCentral()
         maven { url 'https://packages.confluent.io/maven/' }
-
-
-        repos.each { repo ->
-            maven {
-                url = uri("https://maven.pkg.github.com/odradek-dev/${repo}")
-                credentials {
-                    username = System.getenv("USERNAME") ?: project.findProperty("gpr.user")
-                    password = System.getenv("TOKEN") ?:  project.findProperty("gpr.token")
-                }
+        maven {
+            url = uri("https://maven.pkg.github.com/odradek-dev/pay-kafka-intergation")
+            credentials {
+                username = project.findProperty("gpr.user")
+                password = System.getenv("TOKEN") ?: project.findProperty("gpr.token")
             }
         }
     }
