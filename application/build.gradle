@@ -4,12 +4,20 @@ plugins {
 
 bootJar {
     mainClass.set("com.hacks1ash.crypto.wallet.RestApplication")
+
+    layered {
+        enabled = true
+        includeLayerTools = true
+    }
 }
 
 dependencies {
     implementation project(':system-core')
-    implementation project(':blockchain-integration')
     implementation project(':controller')
+    implementation project(':blockchain-integration:core')
+    implementation project(':blockchain-integration:bitcoin')
+    implementation project(':blockchain-integration:litecoin')
+    implementation project(':blockchain-integration:bitcoin-cash')
 }
 
 configurations {
@@ -36,4 +44,5 @@ configurations {
     implementation.extendsFrom(bitcoinJ)
     implementation.extendsFrom(guava)
     implementation.extendsFrom(graphql)
+    implementation.extendsFrom(javaX)
 }

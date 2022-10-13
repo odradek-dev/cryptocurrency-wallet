@@ -29,16 +29,30 @@ graphiql:
 spring:
   data:
     mongodb:
-      uri: mongodb+srv://${DATABASE_USER}:${DATABASE_PASS}@${DATABASE_HOST}/${DATABASE_NAME}?retryWrites=true&w=majority
+      uri: ${DATABASE_URL_SCHEMA}://${DATABASE_USER}:${DATABASE_PASS}@${DATABASE_HOST}/${DATABASE_NAME}${DATABASE_CONN_PARAMS:}
       auto-index-creation: false
   application:
     name: "CryptoCurrency Wallet"
 
+  # Kafka
+  kafka:
+    properties:
+      sasl:
+        mechanism: PLAIN
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    security:
+      protocol: SASL_SSL
+    jaas:
+      enabled: true
+      login-module: org.apache.kafka.common.security.plain.PlainLoginModule
+      options:
+        username: ${KAFKA_JAAS_USERNAME}
+        password: ${KAFKA_JAAS_PASSWORD}
+      control-flag: required
 
 logging:
   file:
-    path: ./
-    name: app.log
+    name: ./logs/app.log
 
 # Swagger
 springdoc:
@@ -50,11 +64,24 @@ springdoc:
     operations-sorter: method
   show-actuator: true
 
-# Nodes
-bitcoin:
-  rpcScheme: http
-  rpcHost: ${BITCOIN_RPC_HOST}
-  rpcPort: ${BITCOIN_RPC_PORT}
-  rpcUsername: ${BITCOIN_RPC_USERNAME}
-  rpcPassword: ${BITCOIN_RPC_PASSWORD}
 
+
+# Nodes
+utxo:
+  nodes:
+    BITCOIN:
+      enabled: ${BITCOIN_ENABLED}
+      scheme: http
+      host: ${BITCOIN_RPC_HOST:}
+      port: ${BITCOIN_RPC_PORT:}
+      username: ${BITCOIN_RPC_USERNAME:}
+      password: ${BITCOIN_RPC_PASSWORD:}
+      network: ${BITCOIN_NETWORK:}
+    LITECOIN:
+      enabled: ${LITECOIN_ENABLED}
+      scheme: http
+      host: ${LITECOIN_RPC_HOST:}
+      port: ${LITECOIN_RPC_PORT:}
+      username: ${LITECOIN_RPC_USERNAME:}
+      password: ${LITECOIN_RPC_PASSWORD:}
+      network: ${LITECOIN_NETWORK:}

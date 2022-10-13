@@ -1,24 +1,28 @@
 package com.hacks1ash.crypto.wallet.core.model;
 
+import com.hacks1ash.crypto.wallet.blockchain.factory.UTXOProvider;
+import com.hacks1ash.crypto.wallet.blockchain.model.NetworkParams;
 import com.hacks1ash.crypto.wallet.core.WalletException;
-import org.bitcoinj.core.NetworkParameters;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@Getter
+@AllArgsConstructor
 public enum CryptoCurrency {
 
-  BITCOIN("btc", NetworkParameters.fromID(NetworkParameters.ID_MAINNET), FeeUnit.SATOSHI, 8),
-  TEST_BITCOIN("tbtc", NetworkParameters.fromID(NetworkParameters.ID_TESTNET), FeeUnit.SATOSHI, 8);
+  BITCOIN("btc", NetworkParams.MAINNET, FeeUnit.SATOSHI, 8, UTXOProvider.BITCOIN),
+  TEST_BITCOIN("tbtc", NetworkParams.TESTNET, FeeUnit.SATOSHI, 8, UTXOProvider.BITCOIN),
+  LOCAL_BITCOIN("lbtc", NetworkParams.LOCAL, FeeUnit.SATOSHI, 8, UTXOProvider.BITCOIN),
+  LITECOIN("ltc", NetworkParams.MAINNET, FeeUnit.LITOSHI, 8, UTXOProvider.LITECOIN),
+  TEST_LITECOIN("tltc", NetworkParams.TESTNET, FeeUnit.LITOSHI, 8, UTXOProvider.LITECOIN),
+  LOCAL_LITECOIN("lltc", NetworkParams.LOCAL, FeeUnit.LITOSHI, 8, UTXOProvider.LITECOIN);
 
   private final String shortName;
-  private final NetworkParameters networkParameters;
+  private final NetworkParams networkParams;
   private final FeeUnit feeUnit;
   private final int decimalPoints;
+  private final UTXOProvider utxoProvider;
 
-  CryptoCurrency(String shortName, NetworkParameters networkParameters, FeeUnit feeUnit, int decimalPoints) {
-    this.shortName = shortName;
-    this.networkParameters = networkParameters;
-    this.feeUnit = feeUnit;
-    this.decimalPoints = decimalPoints;
-  }
 
   public static CryptoCurrency cryptoCurrencyFromShortName(String shortName) {
     for (CryptoCurrency value : CryptoCurrency.values()) {
@@ -28,21 +32,5 @@ public enum CryptoCurrency {
     }
 
     throw new WalletException.CoinNotSupported(shortName);
-  }
-
-  public String getShortName() {
-    return shortName;
-  }
-
-  public NetworkParameters getNetworkParameters() {
-    return networkParameters;
-  }
-
-  public FeeUnit getFeeUnit() {
-    return feeUnit;
-  }
-
-  public int getDecimalPoints() {
-    return decimalPoints;
   }
 }

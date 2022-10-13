@@ -3,7 +3,7 @@ import org.springframework.boot.gradle.plugin.SpringBootPlugin
 buildscript {
 
     repositories {
-        mavenLocal()
+        mavenCentral()
         maven { url "https://plugins.gradle.org/m2/" }
     }
 
@@ -27,15 +27,28 @@ idea {
     }
 }
 
+def codeartifactToken = System.getenv("CODEARTIFACT_TOKEN") ?: "aws codeartifact get-authorization-token --domain odradek --domain-owner 977657838404 --query authorizationToken --output text --profile odradekGithub".execute().text
+
 allprojects {
     repositories {
-        mavenLocal()
         mavenCentral()
         maven { url 'https://packages.confluent.io/maven/' }
+
+        maven {
+            url 'https://odradek-977657838404.d.codeartifact.us-east-1.amazonaws.com/maven/odradek/'
+            credentials {
+                username "aws"
+                password codeartifactToken
+            }
+        }
     }
 }
 
 subprojects {
+
+    if (!file('build.gradle').exists()) {
+        return
+    }
 
     apply plugin: 'io.spring.dependency-management'
     apply plugin: 'org.springframework.boot'
@@ -50,10 +63,6 @@ subprojects {
             outputDir = new File(rootProject.projectDir, '.out')
             testOutputDir = new File(rootProject.projectDir, '.out')
         }
-    }
-
-    if (!file('build.gradle').exists()) {
-        return
     }
 
     apply plugin: 'java'
@@ -92,6 +101,8 @@ subprojects {
         bitcoinJ
         guava
         graphql
+
+        javaX
     }
 
     dependencies {
@@ -104,14 +115,13 @@ subprojects {
         springMail 'org.springframework.boot:spring-boot-starter-mail'
         springDevtools 'org.springframework.boot:spring-boot-devtools'
         springAOP 'org.springframework.boot:spring-boot-starter-aop'
-        springKafka 'org.springframework.kafka:spring-kafka'
+        springKafka 'com.odradek:pay-kafka-intergation:1.0.2'
         springDocs 'org.springdoc:springdoc-openapi-ui:1.5.2'
         springValidation 'org.springframework.boot:spring-boot-starter-validation'
 
         // Monitoring
-        apm 'co.elastic.apm:apm-agent-attach:1.25.0'
-        apm 'co.elastic.apm:apm-agent-api:1.25.0'
-        apm 'co.elastic.apm:apm-opentracing:1.25.0'
+        apm 'co.elastic.apm:apm-agent-api:1.28.4'
+        apm 'co.elastic.apm:apm-opentracing:1.28.4'
 
         // Lombok
         lombok 'org.projectlombok:lombok'
@@ -126,6 +136,8 @@ subprojects {
         graphql 'com.graphql-java:graphql-spring-boot-starter:5.0.2'
         graphql 'com.graphql-java:graphql-java-tools:5.2.4'
         graphql 'com.graphql-java:graphql-java:8.0'
+
+        javaX 'javax.xml.bind:jaxb-api:2.2.4'
 
         // Testing
         springBootStarterTest('org.springframework.boot:spring-boot-starter-test') {

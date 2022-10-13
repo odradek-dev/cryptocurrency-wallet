@@ -1,0 +1,131 @@
+replicaCount: 1
+
+image:
+  repository: 977657838404.dkr.ecr.us-east-1.amazonaws.com/utxo-wallet
+  pullPolicy: Always
+  tag: latest
+
+serviceAccount:
+  create: true
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::977657838404:role/sercrets-manager-k8s-role
+
+service:
+  type: NodePort
+  port: 80
+
+ingress:
+  enabled: true
+  pathType: Prefix
+  annotations:
+    # Ingress Core Settings
+    kubernetes.io/ingress.class: "alb"
+    alb.ingress.kubernetes.io/scheme: internal
+    # Health Check Settings
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-port: traffic-port
+    #Important Note: Need to add health check path annotations in service level if we are planning to use multiple targets in a load balancer
+    alb.ingress.kubernetes.io/healthcheck-path: /api/actuator/health
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '15'
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
+    alb.ingress.kubernetes.io/success-codes: '200'
+    alb.ingress.kubernetes.io/healthy-threshold-count: '2'
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
+    ## SSL Settings
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+secrets:
+  objectName: dev/utxo-wallet-service
+  objects:
+    - path: database_url_schema
+      objectAlias: databaseURLSchema
+    - path: database_user
+      objectAlias: databaseUser
+    - path: database_pass
+      objectAlias: databasePass
+    - path: database_host
+      objectAlias: databaseHost
+    - path: database_name
+      objectAlias: databaseName
+    - path: database_conn_params
+      objectAlias: databaseConnParams
+    - path: bitcoin_enabled
+      objectAlias: bitcoinEnabled
+    - path: bitcoin_rpc_host
+      objectAlias: bitcoinRPCHost
+    - path: bitcoin_rpc_port
+      objectAlias: bitcoinRPCPort
+    - path: bitcoin_rpc_username
+      objectAlias: bitcoinRPCUsername
+    - path: bitcoin_rpc_password
+      objectAlias: bitcoinRPCPassword
+    - path: bitcoin_network
+      objectAlias: bitcoinNetwork
+    - path: litecoin_enabled
+      objectAlias: litecoinEnabled
+    - path: litecoin_rpc_host
+      objectAlias: litecoinRPCHost
+    - path: litecoin_rpc_port
+      objectAlias: litecoinRPCPort
+    - path: litecoin_rpc_username
+      objectAlias: litecoinRPCUsername
+    - path: litecoin_rpc_password
+      objectAlias: litecoinRPCPassword
+    - path: litecoin_network
+      objectAlias: litecoinNetwork
+    - path: kafka_bootstrap_servers
+      objectAlias: kafkaServers
+    - path: kafka_jaas_username
+      objectAlias: kafkaUsername
+    - path: kafka_jaas_password
+      objectAlias: kafkaPassword
+  env:
+    - objectName: databaseURLSchema
+      key: DATABASE_URL_SCHEMA
+    - objectName: databaseUser
+      key: DATABASE_USER
+    - objectName: databasePass
+      key: DATABASE_PASS
+    - objectName: databaseHost
+      key: DATABASE_HOST
+    - objectName: databaseName
+      key: DATABASE_NAME
+    - objectName: databaseConnParams
+      key: DATABASE_CONN_PARAMS
+    - objectName: bitcoinEnabled
+      key: BITCOIN_ENABLED
+    - objectName: bitcoinRPCHost
+      key: BITCOIN_RPC_HOST
+    - objectName: bitcoinRPCPort
+      key: BITCOIN_RPC_PORT
+    - objectName: bitcoinRPCUsername
+      key: BITCOIN_RPC_USERNAME
+    - objectName: bitcoinRPCPassword
+      key: BITCOIN_RPC_PASSWORD
+    - objectName: bitcoinNetwork
+      key: BITCOIN_NETWORK
+    - objectName: litecoinEnabled
+      key: LITECOIN_ENABLED
+    - objectName: litecoinRPCHost
+      key: LITECOIN_RPC_HOST
+    - objectName: litecoinRPCPort
+      key: LITECOIN_RPC_PORT
+    - objectName: litecoinRPCUsername
+      key: LITECOIN_RPC_USERNAME
+    - objectName: litecoinRPCPassword
+      key: LITECOIN_RPC_PASSWORD
+    - objectName: litecoinNetwork
+      key: LITECOIN_NETWORK
+    - objectName: kafkaServers
+      key: KAFKA_BOOTSTRAP_SERVERS
+    - objectName: kafkaUsername
+      key: KAFKA_JAAS_USERNAME
+    - objectName: kafkaPassword
+      key: KAFKA_JAAS_PASSWORD

@@ -1,6 +1,5 @@
 package com.hacks1ash.crypto.wallet;
 
-import co.elastic.apm.attach.ElasticApmAttacher;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -14,7 +13,7 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@SpringBootApplication(scanBasePackages = {"com.hacks1ash.crypto.wallet"})
+@SpringBootApplication(scanBasePackages = {"com.hacks1ash.crypto.wallet", "com.odradek"})
 @EnableMongoRepositories(basePackages = {"com.hacks1ash.crypto.wallet"})
 @EntityScan(basePackages = {"com.hacks1ash.crypto.wallet"})
 @EnableScheduling
@@ -31,7 +30,6 @@ public class RestApplication extends SpringBootServletInitializer {
   }
 
   public static void main(String[] args) {
-    ElasticApmAttacher.attach();
     SpringApplication.run(RestApplication.class, args);
   }
 

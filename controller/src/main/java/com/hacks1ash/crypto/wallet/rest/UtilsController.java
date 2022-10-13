@@ -3,9 +3,11 @@ package com.hacks1ash.crypto.wallet.rest;
 import co.elastic.apm.api.CaptureTransaction;
 import com.hacks1ash.crypto.wallet.core.BlockchainUtilsManager;
 import com.hacks1ash.crypto.wallet.core.model.response.SmartFeeResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Utils API")
 @RestController
 @RequestMapping(value = "utils/")
 public class UtilsController {

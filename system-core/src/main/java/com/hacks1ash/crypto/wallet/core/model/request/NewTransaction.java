@@ -3,15 +3,13 @@ package com.hacks1ash.crypto.wallet.core.model.request;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 public class NewTransaction {
 
-  private String txid;
+  private String txId;
 
-  private List<String> addresses;
+  private String walletName;
 
   private int blockHeight;
 
