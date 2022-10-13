@@ -11,7 +11,8 @@ jobs:
     environment: dev
     runs-on: ubuntu-latest
     permissions:
-      packages: write
+      contents: read
+      packages: read
 
     steps:
       - name: Checkout
@@ -32,6 +33,7 @@ jobs:
           USERNAME: ${{ github.actor }}
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew build
+
 
       - name: Extract branch name
         shell: bash
