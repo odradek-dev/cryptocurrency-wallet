@@ -5,18 +5,6 @@ buildscript {
     repositories {
         mavenCentral()
         maven { url "https://plugins.gradle.org/m2/" }
-
-        repositories {
-            mavenCentral()
-            maven { url 'https://packages.confluent.io/maven/' }
-            maven {
-                url = uri("https://maven.pkg.github.com/odradek-dev/pay-kafka-intergation")
-                credentials {
-                    username = System.getenv("TOKEN") ?: project.findProperty("gpr.user")
-                    password = System.getenv("TOKEN") ?: project.findProperty("gpr.token")
-                }
-            }
-        }
     }
 
     dependencies {
@@ -39,35 +27,26 @@ idea {
     }
 }
 
-def repos = ["pay-kafka-intergation"]
+def repos = ["pay-kafka-intergation", "utxo-wallet"]
 
 allprojects {
     repositories {
         mavenCentral()
         maven { url 'https://packages.confluent.io/maven/' }
-        maven {
-            url = uri("https://maven.pkg.github.com/odradek-dev/pay-kafka-intergation")
-            credentials {
-                username = System.getenv("TOKEN") ?: project.findProperty("gpr.user")
-                password = System.getenv("TOKEN") ?: project.findProperty("gpr.token")
+
+        repos.each { repo ->
+            maven {
+                url = uri("https://maven.pkg.github.com/odradek-dev/${repo}")
+                credentials {
+                    username = System.getenv("TOKEN") ?: project.findProperty("gpr.user")
+                    password = System.getenv("TOKEN") ?: project.findProperty("gpr.token")
+                }
             }
         }
     }
 }
 
 subprojects {
-
-    repositories {
-        mavenCentral()
-        maven { url 'https://packages.confluent.io/maven/' }
-        maven {
-            url = uri("https://maven.pkg.github.com/odradek-dev/pay-kafka-intergation")
-            credentials {
-                username = System.getenv("TOKEN") ?: project.findProperty("gpr.user")
-                password = System.getenv("TOKEN") ?: project.findProperty("gpr.token")
-            }
-        }
-    }
 
     if (!file('build.gradle').exists()) {
         return
