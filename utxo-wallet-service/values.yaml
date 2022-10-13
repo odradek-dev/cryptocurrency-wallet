@@ -11,7 +11,7 @@ serviceAccount:
     eks.amazonaws.com/role-arn: arn:aws:iam::977657838404:role/sercrets-manager-k8s-role
 
 service:
-  type: ClusterIP
+  type: NodePort
   port: 80
 
 ingress:
