@@ -55,6 +55,10 @@ public class TransactionSubscriptionService implements TransactionListener {
 
   @Override
   public void onTransaction(NewTransaction newTransaction) {
+
+    log.info(String.format("Received Webhook for wallet %s", newTransaction.getWalletName()));
+    log.info(newTransaction.toString());
+
     CryptoCurrency cryptoCurrency = CryptoCurrency.cryptoCurrencyFromShortName(newTransaction.getCoin());
     UTXORPCClient rpcClient = utxoClientFactory.getClient(cryptoCurrency.getUtxoProvider());
     Wallet wallet = walletRepository.findByNodeWalletNameAlias(newTransaction.getWalletName()).orElseThrow(() -> new WalletException.WalletNotFound(newTransaction.getWalletName()));
