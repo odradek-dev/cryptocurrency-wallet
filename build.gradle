@@ -27,7 +27,7 @@ idea {
     }
 }
 
-def codeartifactToken = System.getenv("CODEARTIFACT_TOKEN") ?: "aws codeartifact get-authorization-token --domain odradek --domain-owner 977657838404 --query authorizationToken --output text --profile odradekGithub".execute().text
+def codeartifactToken = System.getenv("CODEARTIFACT_TOKEN") ?: "aws codeartifact get-authorization-token --domain odradek --domain-owner 977657838404 --query authorizationToken --output text".execute().text
 
 allprojects {
     repositories {
@@ -35,7 +35,7 @@ allprojects {
         maven { url 'https://packages.confluent.io/maven/' }
 
         maven {
-            url 'https://odradek-977657838404.d.codeartifact.us-east-1.amazonaws.com/maven/odradek/'
+            url 'https://odradek-977657838404.d.codeartifact.eu-central-1.amazonaws.com/maven/odradek/'
             credentials {
                 username "aws"
                 password codeartifactToken
