@@ -1,14 +1,14 @@
 replicaCount: 1
 
 image:
-  repository: 977657838404.dkr.ecr.us-east-1.amazonaws.com/utxo-wallet
+  repository: 662147410103.dkr.ecr.eu-central-1.amazonaws.com/utxo-wallet
   pullPolicy: Always
   tag: latest
 
 serviceAccount:
   create: true
   annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::977657838404:role/sercrets-manager-k8s-role
+    eks.amazonaws.com/role-arn: arn:aws:iam::662147410103:role/read-secrets-k8s-role
 
 service:
   type: NodePort
@@ -20,7 +20,7 @@ ingress:
   annotations:
     # Ingress Core Settings
     kubernetes.io/ingress.class: "alb"
-    alb.ingress.kubernetes.io/scheme: internal
+    alb.ingress.kubernetes.io/scheme: internet-facing
     # Health Check Settings
     alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
     alb.ingress.kubernetes.io/healthcheck-port: traffic-port

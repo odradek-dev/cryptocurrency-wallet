@@ -249,7 +249,7 @@ server=1
 [test]
 rest=1
 rpcbind=0.0.0.0
-rpcauth=test:4845106279903cc52fcc3fc586c9790e\$1492b3ed5110ac8ae47e09243f5be792402e898e15a0ee20d9e310b7357f495f
+rpcauth=${rpc_auth}
 rpcport=18332
 rpcallowip=0.0.0.0/0
 walletnotify=/usr/bin/python3 $bitcoin_services_base_path/wallet_notify.py %s %w %h

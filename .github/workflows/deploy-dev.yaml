@@ -27,7 +27,7 @@ jobs:
 
       - name: Get CodeArtifact Token
         shell: bash
-        run: echo "##[set-output name=token;]$(echo $(aws codeartifact get-authorization-token --domain odradek --domain-owner 977657838404  --query authorizationToken --output text))"
+        run: echo "##[set-output name=token;]$(echo $(aws codeartifact get-authorization-token --domain odradek --domain-owner 662147410103  --query authorizationToken --output text))"
         id: codeartifact
 
       - name: Set up JDK 11

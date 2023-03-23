@@ -27,7 +27,11 @@ idea {
     }
 }
 
-def codeartifactToken = System.getenv("CODEARTIFACT_TOKEN") ?: "aws codeartifact get-authorization-token --domain odradek --domain-owner 977657838404 --query authorizationToken --output text".execute().text
+def awsCodeArtifactDomainName = System.getenv("CODEARTIFACT_DOMAIN") ?: "odradek"
+def awsCodeArtifactRepository = System.getenv("CODEARTIFACT_REPOSITORY") ?: "odradek"
+def awsRegion = System.getenv("AWS_REGION") ?: "eu-central-1"
+def awsAccountID = System.getenv("AWS_ACCOUNT_ID") ?: "662147410103"
+def codeartifactToken = System.getenv("CODEARTIFACT_TOKEN") ?: "aws codeartifact get-authorization-token --domain ${awsCodeArtifactDomainName} --domain-owner ${awsAccountID} --query authorizationToken --output text".execute().text
 
 allprojects {
     repositories {
@@ -35,7 +39,7 @@ allprojects {
         maven { url 'https://packages.confluent.io/maven/' }
 
         maven {
-            url 'https://odradek-977657838404.d.codeartifact.eu-central-1.amazonaws.com/maven/odradek/'
+            url "https://${awsCodeArtifactDomainName}-${awsAccountID}.d.codeartifact.${awsRegion}.amazonaws.com/maven/${awsCodeArtifactRepository}/"
             credentials {
                 username "aws"
                 password codeartifactToken

@@ -44,3 +44,9 @@ build
 
 /secrets.yml
 **/venv
+
+### Terraform ###
+.terraform
+*.tfstate
+*.tfstate.backup
+*.tfstate.lock.info
