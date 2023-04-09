@@ -6,9 +6,7 @@ import com.hacks1ash.crypto.wallet.blockchain.factory.UTXOProvider;
 import com.hacks1ash.crypto.wallet.blockchain.model.AddressType;
 import com.hacks1ash.crypto.wallet.blockchain.model.AddressWithPrivate;
 import com.hacks1ash.crypto.wallet.blockchain.model.NetworkParams;
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.LegacyAddress;
-import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.core.*;
 import org.bitcoinj.crypto.DeterministicKey;
 import org.bitcoinj.crypto.HDKeyDerivation;
 import org.bitcoinj.params.MainNetParams;
@@ -55,6 +53,8 @@ public class BitcoinAddressManagerBean implements UTXOAddressManager {
       case P2PKH:
         return new AddressWithPrivate(LegacyAddress.fromKey(parameters, ecKey).toString(), privateKeyAsWiF);
       case BECH_32:
+        Address address = SegwitAddress.fromKey(parameters, ecKey, Script.ScriptType.P2WPKH);
+        return new AddressWithPrivate(address.toString(), privateKeyAsWiF);
       case DEFAULT:
       case P2SH:
       default:
