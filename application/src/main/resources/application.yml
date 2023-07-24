@@ -5,7 +5,7 @@ server:
   shutdown: graceful
   servlet:
     context-path: /api
-  forward-headers-strategy: native
+  forward-headers-strategy: framework
 
 # GraphQL
 graphql:
@@ -56,13 +56,23 @@ logging:
 
 # Swagger
 springdoc:
-  api-docs:
-    enabled: true
-    path: docs
   swagger-ui:
+    display-request-duration: true
+    groups-order: DESC
+    operationsSorter: method
+    disable-swagger-default-url: true
+    enabled: true
     path: swagger
-    operations-sorter: method
-  show-actuator: true
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
+  show-actuator: false
+  pre-loading-enabled: true
+  writer-with-default-pretty-printer: true
+  api-docs:
+    groups:
+      enabled: true
+    enabled: true
+
 
 
 
